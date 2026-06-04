@@ -941,7 +941,7 @@ let heroTagsDraft = [];
        /exec URL into DRIVE_UPLOAD_ENDPOINT below.
    ============================================================ */
 const DRIVE_FOLDER_ID = "133b3Jg6s2Pf3FxrvYRJM52lmI6KlrXdb";
-const DRIVE_UPLOAD_ENDPOINT = "https://script.google.com/macros/s/AKfycbwX5W3kI1hsD9NE4DrUdGTGgNrnma-razXyalop-NnV5DDY4l4O7u_OOPqw-c0HBXlltw/exec"; // Apps Script Web App URL
+const DRIVE_UPLOAD_ENDPOINT = "https://script.google.com/macros/s/AKfycbwpF_a1rpVU_tx2kfyqCjn-Y_blrU9CfyBWfvWZOkIX1qflUsu3KIS-caev3UZTKlAJpg/exec"; // Apps Script Web App URL
 
 function fileToBase64(file){
   return new Promise((res,rej)=>{
@@ -951,19 +951,43 @@ function fileToBase64(file){
     r.readAsDataURL(file);
   });
 }
+/* อัปโหลดไป Drive ผ่าน Apps Script
+   ใช้แนวทาง no-cors + key + poll:
+   (1) POST ไฟล์แบบ no-cors (ส่งได้ ไม่ติด CORS แต่อ่าน response ไม่ได้)
+   (2) GAS เก็บลิงก์ผลลัพธ์ไว้ใน CacheService โดยอ้างด้วย key
+   (3) วน GET ?key=... เพื่อดึงลิงก์กลับ (GET อ่านข้าม origin ได้)
+   ต้องใช้คู่กับ GAS เวอร์ชันที่มี doGet(?key=) + บันทึก cache (ดูภาคผนวก) */
 async function uploadToDrive(file){
   if(!DRIVE_UPLOAD_ENDPOINT){
     throw new Error("ยังไม่ได้ตั้งค่า DRIVE_UPLOAD_ENDPOINT — โปรดติดตั้ง Apps Script ก่อน (ดูคำแนะนำ)");
   }
-  if(file.size > 8*1024*1024) throw new Error("ไฟล์ใหญ่เกิน 8MB");
+  if(file.size > 10*1024*1024) throw new Error("ไฟล์ใหญ่เกิน 10MB");
   const data = await fileToBase64(file);
-  const resp = await fetch(DRIVE_UPLOAD_ENDPOINT,{
-    method:"POST",
-    body: JSON.stringify({ filename:file.name, mimeType:file.type, data, folderId:DRIVE_FOLDER_ID })
-  });
-  const json = await resp.json();
-  if(!json || !json.url) throw new Error((json&&json.error) || "อัปโหลดไม่สำเร็จ");
-  return json.url;
+  const key = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+  // (1) ส่งไฟล์ — no-cors จึงไม่ต้องอ่าน response (เลี่ยงปัญหา CORS)
+  try{
+    await fetch(DRIVE_UPLOAD_ENDPOINT,{
+      method:"POST", mode:"no-cors",
+      headers:{ "Content-Type":"text/plain;charset=utf-8" },
+      body: JSON.stringify({ key, filename:file.name, mimeType:file.type, data, folderId:DRIVE_FOLDER_ID })
+    });
+  }catch(e){ /* no-cors โดยปกติไม่ throw */ }
+  // (2) วนอ่านลิงก์กลับด้วย key (สูงสุด ~24 วินาที)
+  for(let i=0;i<20;i++){
+    await new Promise(r=>setTimeout(r,1200));
+    try{
+      const r = await fetch(DRIVE_UPLOAD_ENDPOINT + "?key=" + encodeURIComponent(key) + "&t=" + Date.now());
+      const j = await r.json();
+      if(j && j.error) throw new Error(j.error);
+      if(j && (j.url || j.id)) return j.url || ("https://drive.google.com/thumbnail?id=" + j.id + "&sz=w1600");
+    }catch(e){
+      if(e.message && /[\u0E00-\u0E7F]/.test(e.message)) throw e; // error ข้อความไทยจาก GAS = หยุดเลย
+      /* ไม่งั้นถือว่ายังไม่พร้อม วนต่อ */
+    }
+  }
+  throw new Error("อัปโหลดช้าหรือไม่สำเร็จ — ตรวจว่า GAS เป็นเวอร์ชันที่รองรับ ?key= และลองใหม่");
 }
 /* wire a [file input] + [url text input] + [preview] trio */
 function wireUpload(fileId, urlId, previewId){
@@ -971,17 +995,17 @@ function wireUpload(fileId, urlId, previewId){
   if(!fileInp) return;
   urlInp.addEventListener("input",()=>{
     const v = urlInp.value.trim();
-    prev.innerHTML = v ? `<img src="${v}" onerror="this.style.display='none'"/>` : "";
+    prev.innerHTML = v ? `<img src="${v}" referrerpolicy="no-referrer" onerror="this.style.display='none'"/>` : "";
   });
   fileInp.addEventListener("change",async ()=>{
     const f = fileInp.files[0]; if(!f) return;
     const btn = fileInp.closest(".upload-btn");
     btn && btn.classList.add("loading");
     try{
-      toast("กำลังอัปโหลด...");
+      toast("กำลังอัปโหลด… (อาจใช้เวลาสองสามวินาที)");
       const url = await uploadToDrive(f);
       urlInp.value = url;
-      prev.innerHTML = `<img src="${url}" onerror="this.style.display='none'"/>`;
+      prev.innerHTML = `<img src="${url}" referrerpolicy="no-referrer" onerror="this.style.display='none'"/>`;
       toast("อัปโหลดแล้ว ✓");
     }catch(e){ toast(e.message); }
     finally{ btn && btn.classList.remove("loading"); fileInp.value=""; }
@@ -1131,7 +1155,7 @@ function renderStaff(){
   if(!list.length){ grid.innerHTML = EMPTY; return; }
   grid.innerHTML = list.map(s=>`
     <div class="staff-card">
-      <div class="staff-photo">${s.photoUrl?`<img src="${esc(s.photoUrl)}" onerror="this.outerHTML='<span class=&quot;ph&quot;>👤</span>'"/>`:'<span class="ph">👤</span>'}</div>
+      <div class="staff-photo">${s.photoUrl?`<img src="${esc(s.photoUrl)}" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ph&quot;>👤</span>'"/>`:'<span class="ph">👤</span>'}</div>
       <div class="nm">${esc(s.name)}</div>
       <div class="pos">${esc(s.position)}</div>
       ${s.department?`<div class="dept">${esc(s.department)}</div>`:""}
@@ -1182,7 +1206,7 @@ db.collection("links").onSnapshot(snap=>{
   const visible = links.filter(l=>l.visible!==false);
   grid.innerHTML = visible.length? visible.map(l=>`
     <a class="link-card" href="${esc(l.url)}" target="_blank" rel="noopener">
-      ${l.imageUrl?`<img class="link-logo" src="${esc(l.imageUrl)}" alt="" onerror="this.outerHTML='<span class=&quot;ic&quot;>${esc(l.icon)||'🔗'}</span>'"/>`:`<span class="ic">${esc(l.icon)||"🔗"}</span>`}
+      ${l.imageUrl?`<img class="link-logo" src="${esc(l.imageUrl)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ic&quot;>${esc(l.icon)||'🔗'}</span>'"/>`:`<span class="ic">${esc(l.icon)||"🔗"}</span>`}
       <span class="lb">${esc(l.label)}</span>
       <span class="url">${esc(l.url)}</span>
     </a>`).join("") : EMPTY;
@@ -1390,7 +1414,7 @@ function renderAdminStaff(){
   const roleTxt={admin:"ผู้บริหาร",teacher:"ครู",support:"บุคลากร"};
   al.innerHTML = STAFF.length? STAFF.map(s=>`
     <div class="admin-item">
-      ${s.photoUrl?`<img src="${esc(s.photoUrl)}" onerror="this.outerHTML='<div class=&quot;av&quot;>👤</div>'"/>`:'<div class="av">👤</div>'}
+      ${s.photoUrl?`<img src="${esc(s.photoUrl)}" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;av&quot;>👤</div>'"/>`:'<div class="av">👤</div>'}
       <div class="info"><b>${esc(s.name)}</b><small>${esc(s.position)} · ${roleTxt[s.role]||s.role||""}</small></div>
       <div class="acts"><button class="btn btn-danger btn-sm" onclick="delDoc('staff','${s.id}')">ลบ</button></div>
     </div>`).join("") : EMPTY;
