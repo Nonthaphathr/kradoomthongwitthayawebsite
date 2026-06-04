@@ -229,7 +229,21 @@ section{padding:110px 0;position:relative}
 .history-side .year small{display:block;font-size:.8rem;color:var(--txt-faint);font-weight:500;letter-spacing:.1em;margin-top:6px}
 .history-body h3{font-size:1.7rem;font-weight:800;margin-bottom:20px}
 .history-body .rich{color:var(--txt-dim);font-size:1.08rem;line-height:1.9}
+.history-body .rich.plain{white-space:pre-wrap;word-break:break-word}
 .history-body .rich p{margin-bottom:16px}
+.history-body .rich.clamped{
+  display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,#000 72%,transparent 100%);
+          mask-image:linear-gradient(180deg,#000 72%,transparent 100%);
+}
+.readmore-btn{
+  margin-top:18px;display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--sans);font-weight:700;font-size:.9rem;color:var(--accent);
+  background:var(--accent-soft);border:1px solid rgba(255,107,43,.3);
+  padding:9px 18px;border-radius:999px;transition:.22s;
+}
+.readmore-btn:hover{background:var(--accent);color:#160a00;transform:translateY(-2px)}
 
 /* ============================================================
    SECTION 2 — VMV CARDS
@@ -295,19 +309,49 @@ section{padding:110px 0;position:relative}
 .staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:26px}
 .staff-card{text-align:center;transition:.3s;padding:14px}
 .staff-card:hover{transform:translateY(-8px)}
+.photo-wrap{position:relative;width:130px;margin:0 auto 18px}
 .staff-photo{
-  width:130px;height:130px;border-radius:50%;margin:0 auto 18px;overflow:hidden;
+  width:130px;height:130px;border-radius:50%;overflow:hidden;
   border:2px solid var(--line);transition:.3s;background:var(--bg-card);
   display:grid;place-items:center;
 }
 .staff-card:hover .staff-photo{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
 .staff-photo img{width:100%;height:100%;object-fit:cover}
 .staff-photo .ph{font-size:2.2rem;color:var(--txt-faint)}
+/* หัวหน้ากลุ่มงาน — กรอบวงกลม + ป้ายมินิมอล (ใหญ่กว่าปกติ ~10%) */
+.staff-card.is-head .photo-wrap{width:143px}
+.staff-card.is-head .staff-photo{
+  width:143px;height:143px;
+  border-color:var(--accent);
+  box-shadow:0 0 0 4px var(--bg),0 0 0 6px var(--accent),0 10px 30px -10px var(--accent-glow);
+}
+.head-badge{
+  position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);
+  background:var(--accent);color:#160a00;
+  font-family:var(--sans);font-size:.62rem;font-weight:800;letter-spacing:.02em;
+  padding:4px 12px;border-radius:999px;white-space:nowrap;
+  border:2px solid var(--bg);box-shadow:0 6px 16px -6px var(--accent-glow);
+}
+.head-check{
+  display:flex;align-items:center;gap:10px;margin-bottom:18px;cursor:pointer;
+  font-size:.9rem;color:var(--txt-dim);
+  background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+}
+.head-check input{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.head-check b{color:var(--accent)}
 .staff-card .nm{font-weight:700;font-size:1.02rem}
 .staff-card .pos{color:var(--accent);font-size:.86rem;font-weight:500;margin-top:4px}
 .staff-card .dept{color:var(--txt-faint);font-size:.8rem;margin-top:2px}
 .staff-card .line{display:inline-block;margin-top:8px;font-size:.74rem;color:var(--txt-dim);
   background:rgba(255,255,255,.05);padding:3px 10px;border-radius:99px}
+.staff-group{margin-bottom:54px}
+.staff-group:last-child{margin-bottom:0}
+.staff-group-title{
+  font-family:var(--sans);font-weight:800;font-size:1.2rem;margin-bottom:6px;
+  display:flex;align-items:center;gap:12px;
+}
+.staff-group-title::before{content:"";width:6px;height:24px;border-radius:3px;background:var(--accent)}
+.staff-group-sub{color:var(--txt-faint);font-size:.85rem;margin-bottom:26px;padding-left:18px}
 
 /* ============================================================
    SECTION 5 — COMMITTEE
@@ -479,6 +523,17 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
 .btn-sm{padding:7px 14px;font-size:.8rem;border-radius:9px}
 .btn-danger{background:rgba(255,59,59,.15);color:#ff6b6b;border:1px solid rgba(255,59,59,.3)}
 .btn-danger:hover{background:#ff3b3b;color:#fff}
+.btn.is-loading{position:relative;color:transparent!important;pointer-events:none;opacity:.9}
+.btn.is-loading::after{
+  content:"";position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;
+  border:2px solid rgba(150,150,150,.45);border-top-color:var(--accent);border-radius:50%;
+  animation:btnspin .7s linear infinite;
+}
+@keyframes btnspin{to{transform:rotate(360deg)}}
+/* SweetAlert2 ปรับให้เข้ากับธีม */
+.swal2-popup{border:1px solid var(--line-2)!important;border-radius:var(--r-lg)!important;font-family:var(--thai)!important}
+.swal2-title{font-weight:800!important}
+.swal2-styled.swal2-confirm{font-weight:700!important}
 
 .tag-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .tag-pill{display:inline-flex;align-items:center;gap:8px;background:var(--bg-card);border:1px solid var(--line);
@@ -496,6 +551,7 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
 .admin-item .info b{display:block;font-size:.95rem}
 .admin-item .info small{color:var(--txt-faint);font-size:.8rem}
 .admin-item .acts{display:flex;gap:6px;flex-shrink:0}
+.admin-item.editing{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .admin-divider{height:1px;background:var(--line);margin:26px 0}
 .admin-sub{font-size:1.05rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .add-form{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:8px}
@@ -643,12 +699,7 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
       <div class="sec-label">Our Team</div>
       <h2 class="sec-title">ผู้บริหาร ครู และบุคลากร</h2>
     </div>
-    <div class="tabs reveal" data-d="1">
-      <button class="tab active" data-role="admin">ผู้บริหาร</button>
-      <button class="tab" data-role="teacher">ครู</button>
-      <button class="tab" data-role="support">บุคลากร</button>
-    </div>
-    <div class="staff-grid reveal" data-d="2" id="staffGrid"></div>
+    <div class="reveal" data-d="1" id="staffGroups"></div>
   </div>
 </section>
 
@@ -800,11 +851,11 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
           <div class="admin-sub">➕ เพิ่มบุคลากร</div>
           <div class="add-form">
             <div class="field-row">
-              <div class="field"><label>ชื่อ-นามสกุล</label><input id="s_name" /></div>
-              <div class="field"><label>ตำแหน่ง</label><input id="s_position" /></div>
+              <div class="field"><label>ชื่อ-นามสกุล</label><input id="s_name" list="dl_name" autocomplete="off" /></div>
+              <div class="field"><label>ตำแหน่ง</label><input id="s_position" list="dl_position" autocomplete="off" /></div>
             </div>
             <div class="field-row">
-              <div class="field"><label>กลุ่มสาระ/ฝ่าย</label><input id="s_department" /></div>
+              <div class="field"><label>กลุ่มสาระ/ฝ่าย</label><input id="s_department" list="dl_department" autocomplete="off" /></div>
               <div class="field"><label>ประเภท (role)</label>
                 <select id="s_role">
                   <option value="admin">ผู้บริหาร</option>
@@ -813,6 +864,18 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
                 </select>
               </div>
             </div>
+            <div class="field"><label>กลุ่มบริหารงาน (สำหรับแบ่งกลุ่มแสดงผล) — ผู้บริหารจะแสดงแยกด้านบนเสมอ</label>
+              <select id="s_group">
+                <option value="academic">กลุ่มบริหารวิชาการ</option>
+                <option value="budget">กลุ่มบริหารงบประมาณ</option>
+                <option value="personnel">กลุ่มบริหารงานบุคคล</option>
+                <option value="general">กลุ่มบริหารทั่วไป</option>
+              </select>
+            </div>
+            <label class="head-check">
+              <input type="checkbox" id="s_isHead" />
+              <span>เป็น <b>หัวหน้ากลุ่มงาน</b> (จะแสดงกรอบและป้ายพิเศษบนรูป)</span>
+            </label>
             <div class="field">
               <label>รูปภาพบุคลากร (อัปโหลดขึ้น Google Drive หรือ วางลิงก์)</label>
               <div class="upload-row">
@@ -822,7 +885,11 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
               <div class="img-preview" id="s_photoPreview"></div>
             </div>
             <div class="field"><label>Line ID (ไม่บังคับ)</label><input id="s_lineId" /></div>
-            <button class="btn btn-primary btn-sm" id="addStaff">เพิ่มบุคลากร</button>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" id="addStaff">เพิ่มบุคลากร</button>
+              <button class="btn btn-ghost btn-sm" id="cancelStaffEdit" style="display:none">ยกเลิกการแก้ไข</button>
+              <span id="staffEditBadge" style="display:none;font-size:.82rem;color:var(--accent);font-weight:700">✎ กำลังแก้ไขรายการ</span>
+            </div>
           </div>
           <div class="admin-divider"></div>
           <div class="admin-sub">📋 บุคลากรทั้งหมด</div>
@@ -856,7 +923,7 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
             <div class="field"><label>โทรศัพท์ (phone)</label><input id="c_phone" /></div>
             <div class="field"><label>อีเมล (email)</label><input id="c_email" /></div>
           </div>
-          <div class="field"><label>ลิงก์ฝังแผนที่ Google Maps (mapEmbedUrl)</label><input id="c_mapEmbedUrl" /></div>
+          <div class="field"><label>แผนที่ Google Maps — วางได้ทั้งโค้ด &lt;iframe&gt; ทั้งก้อน, ลิงก์ฝัง (embed), หรือลิงก์แผนที่ปกติ</label><input id="c_mapEmbedUrl" placeholder='วาง <iframe...> หรือ https://www.google.com/maps/...' /></div>
           <div class="field-row">
             <div class="field"><label>Facebook URL</label><input id="c_facebook" /></div>
             <div class="field"><label>Line URL</label><input id="c_line" /></div>
@@ -871,8 +938,8 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
           <div class="admin-sub">➕ เพิ่มกรรมการ</div>
           <div class="add-form">
             <div class="field-row">
-              <div class="field"><label>ชื่อ-นามสกุล</label><input id="m_name" /></div>
-              <div class="field"><label>ตำแหน่ง</label><input id="m_position" /></div>
+              <div class="field"><label>ชื่อ-นามสกุล</label><input id="m_name" list="dl_name" autocomplete="off" /></div>
+              <div class="field"><label>ตำแหน่ง</label><input id="m_position" list="dl_position" autocomplete="off" /></div>
             </div>
             <div class="field"><label>ลำดับ (order)</label><input id="m_order" type="number" value="1" /></div>
             <button class="btn btn-primary btn-sm" id="addCommittee">เพิ่มกรรมการ</button>
@@ -887,6 +954,11 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
   </div>
 </div>
 
+<!-- DATALISTS (autofill suggestions from existing data) -->
+<datalist id="dl_name"></datalist>
+<datalist id="dl_position"></datalist>
+<datalist id="dl_department"></datalist>
+
 <!-- TOAST -->
 <div class="toast" id="toast"><span class="chk">✓</span><span id="toastMsg">บันทึกแล้ว</span></div>
 
@@ -895,6 +967,8 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
      ============================================================ -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- SweetAlert2 (popup/loading modal) -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 /* ===== Firebase init ===== */
@@ -928,9 +1002,97 @@ function toast(msg="บันทึกแล้ว"){
   toastTimer = setTimeout(()=>t.classList.remove("show"), isErr ? 4500 : 2200);
 }
 
+/* ===== SweetAlert2 helpers (ธีมเข้ม + สีส้มของเว็บ) ===== */
+const SW_BASE = { background:"#1a1a1a", color:"#f4f4f4", confirmButtonColor:"#FF6B2B", cancelButtonColor:"#3a3a3a" };
+const SW = {
+  // โมดัลกำลังโหลด (สปินเนอร์) — กดปิดไม่ได้จนกว่าจะเสร็จ
+  loading(title="กำลังบันทึก…"){
+    if(!window.Swal) return;
+    Swal.fire({ ...SW_BASE, title, allowOutsideClick:false, allowEscapeKey:false,
+      showConfirmButton:false, didOpen:()=>Swal.showLoading() });
+  },
+  // แจ้งสำเร็จแบบ toast เล็กมุมจอ (ไม่ขวางการทำงาน)
+  ok(title="สำเร็จ"){
+    if(!window.Swal) return toast(title+" ✓");
+    Swal.fire({ ...SW_BASE, toast:true, position:"top-end", icon:"success", title,
+      showConfirmButton:false, timer:1800, timerProgressBar:true });
+  },
+  // แจ้งข้อผิดพลาดแบบโมดัลกลางจอ
+  err(title="เกิดข้อผิดพลาด", text=""){
+    if(!window.Swal) return toast(title+" "+text);
+    Swal.fire({ ...SW_BASE, icon:"error", title, text });
+  },
+  // กล่องยืนยัน (คืน true/false)
+  async confirm(title, text=""){
+    if(!window.Swal) return window.confirm(title);
+    const r = await Swal.fire({ ...SW_BASE, icon:"warning", title, text,
+      showCancelButton:true, confirmButtonText:"ยืนยัน", cancelButtonText:"ยกเลิก",
+      reverseButtons:true });
+    return r.isConfirmed;
+  }
+};
+
+/* แสดงสปินเนอร์บนปุ่มระหว่างทำงาน */
+function btnLoading(btn, on){
+  if(!btn) return;
+  btn.classList.toggle("is-loading", !!on);
+  btn.disabled = !!on;
+}
+
+/* ===== Autofill suggestions (datalist) — รวมคำที่เคยกรอกไว้ ===== */
+function _uniq(arr){ return [...new Set(arr.map(x=>(x==null?"":String(x)).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"th")); }
+function _fillDL(id, values){
+  const dl = $("#"+id); if(!dl) return;
+  dl.innerHTML = values.map(v=>`<option value="${esc(v)}"></option>`).join("");
+}
+function refreshDatalists(){
+  _fillDL("dl_name",       _uniq([...STAFF.map(s=>s.name),     ...COMMITTEE.map(c=>c.name)]));
+  _fillDL("dl_position",   _uniq([...STAFF.map(s=>s.position), ...COMMITTEE.map(c=>c.position)]));
+  _fillDL("dl_department", _uniq(STAFF.map(s=>s.department)));
+}
+
 /* state for editors */
 let SETTINGS = {};
 let heroTagsDraft = [];
+
+/* จำสถานะปลดล็อกแผงผู้ดูแล — กรอก PIN ครั้งเดียว จดจำจนกว่าจะปิด/รีโหลดหน้า */
+let adminUnlocked = false;
+
+/* 4 กลุ่มบริหารงาน (ใช้แบ่งส่วนแสดงผลบุคลากร) */
+const STAFF_GROUPS = [
+  {key:"academic",  label:"กลุ่มบริหารวิชาการ",   sub:"งานด้านหลักสูตรและการจัดการเรียนการสอน"},
+  {key:"budget",    label:"กลุ่มบริหารงบประมาณ",  sub:"งานด้านงบประมาณ การเงิน และพัสดุ"},
+  {key:"personnel", label:"กลุ่มบริหารงานบุคคล",  sub:"งานด้านบุคลากรและการพัฒนาครู"},
+  {key:"general",   label:"กลุ่มบริหารทั่วไป",     sub:"งานด้านอาคารสถานที่และบริการทั่วไป"},
+];
+const GROUP_LABEL = Object.fromEntries(STAFF_GROUPS.map(g=>[g.key,g.label]));
+
+/* แปลงค่าที่ผู้ใช้วางมาให้เป็น URL ที่ฝัง <iframe> ได้จริง
+   รองรับ: โค้ด <iframe...> ทั้งก้อน, ลิงก์ embed, ลิงก์ /maps/place,
+           พิกัด @lat,lng, หรือข้อความ/ที่อยู่ธรรมดา */
+function toMapEmbed(raw){
+  if(!raw) return "";
+  let v = String(raw).trim();
+  // (1) ถ้าวางโค้ด <iframe ...> ทั้งก้อน → ดึงเฉพาะ src
+  const mIframe = v.match(/src\s*=\s*["']([^"']+)["']/i);
+  if(mIframe) v = mIframe[1];
+  // (2) เป็น URL ที่ฝังได้อยู่แล้ว → ใช้ได้เลย
+  if(/\/maps\/embed|[?&]output=embed/i.test(v)) return v;
+  // (3) มีพิกัด @lat,lng ในลิงก์ → สร้างลิงก์ฝังจากพิกัด
+  const c = v.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(c) return `https://www.google.com/maps?q=${c[1]},${c[2]}&z=16&output=embed`;
+  // (4) ลิงก์ /maps/place/ชื่อสถานที่ → ดึงชื่อมาทำเป็นคำค้น
+  const p = v.match(/\/maps\/place\/([^\/@?]+)/);
+  if(p){
+    const q = decodeURIComponent(p[1].replace(/\+/g," "));
+    return `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+  }
+  // (5) เป็นข้อความ/ที่อยู่/พิกัดล้วน (ไม่ใช่ลิงก์) → ค้นหาแล้วฝัง
+  if(!/^https?:\/\//i.test(v)) return `https://www.google.com/maps?q=${encodeURIComponent(v)}&output=embed`;
+  // (6) ลิงก์อื่น ๆ (เช่น goo.gl) ฝังตรง ๆ ไม่ได้ — คืนค่าว่างเพื่อให้แสดงคำแนะนำแทน
+  if(/maps\.app\.goo\.gl|goo\.gl/i.test(v)) return "";
+  return v;
+}
 
 /* ============================================================
    GOOGLE DRIVE UPLOAD (via Apps Script Web App)
@@ -1001,13 +1163,13 @@ function wireUpload(fileId, urlId, previewId){
     const f = fileInp.files[0]; if(!f) return;
     const btn = fileInp.closest(".upload-btn");
     btn && btn.classList.add("loading");
+    SW.loading("กำลังอัปโหลดรูป… (อาจใช้เวลาสองสามวินาที)");
     try{
-      toast("กำลังอัปโหลด… (อาจใช้เวลาสองสามวินาที)");
       const url = await uploadToDrive(f);
       urlInp.value = url;
       prev.innerHTML = `<img src="${url}" referrerpolicy="no-referrer" onerror="this.style.display='none'"/>`;
-      toast("อัปโหลดแล้ว ✓");
-    }catch(e){ toast(e.message); }
+      SW.ok("อัปโหลดรูปแล้ว");
+    }catch(e){ SW.err("อัปโหลดไม่สำเร็จ", e.message); }
     finally{ btn && btn.classList.remove("loading"); fileInp.value=""; }
   });
 }
@@ -1097,9 +1259,31 @@ async function loadHistory(){
     $("#histYear").innerHTML = d.foundedYear
       ? `${esc(d.foundedYear)}<small>ปีที่ก่อตั้ง</small>`
       : `<span style="font-size:1rem;color:var(--txt-faint)">—</span>`;
-    $("#histBody").innerHTML = (d.title||d.body)
-      ? `<h3>${esc(d.title||"")}</h3><div class="rich">${d.body||""}</div>`
-      : EMPTY;
+    if(d.title||d.body){
+      const raw = d.body||"";
+      // ถ้ามีแท็ก HTML จริง → เรนเดอร์เป็น HTML, ถ้าเป็นข้อความล้วน → คงบรรทัด/ช่องว่างตามต้นฉบับ
+      const looksHtml = /<\/?[a-z][^>]*>/i.test(raw);
+      const bodyHtml = looksHtml ? raw : esc(raw);
+      const richClass = looksHtml ? "rich clamped" : "rich clamped plain";
+      $("#histBody").innerHTML =
+        `<h3>${esc(d.title||"")}</h3>`+
+        `<div class="${richClass}" id="histRich">${bodyHtml}</div>`+
+        `<button class="readmore-btn" id="histToggle" style="display:none">ดูเพิ่มเติม ▾</button>`;
+      // วัดความสูงหลังเรนเดอร์ (เผื่อเวลาฟอนต์โหลด) แล้วค่อยตัดสินใจโชว์ปุ่ม
+      setTimeout(()=>{
+        const rich = $("#histRich"), btn = $("#histToggle");
+        if(!rich || !btn) return;
+        if(rich.scrollHeight - rich.clientHeight > 4){
+          btn.style.display = "inline-flex";
+          btn.onclick = ()=>{
+            const clamped = rich.classList.toggle("clamped"); // true = ย่ออยู่
+            btn.innerHTML = clamped ? "ดูเพิ่มเติม ▾" : "ย่อลง ▴";
+          };
+        }
+      }, 250);
+    }else{
+      $("#histBody").innerHTML = EMPTY;
+    }
     // fill admin
     $("#c_hist_title").value = d.title||"";
     $("#c_hist_year").value = d.foundedYear||"";
@@ -1148,25 +1332,54 @@ async function loadIdentity(){
    LOAD: staff (with tab filter)
    ============================================================ */
 let STAFF = [];
-let activeRole = "admin";
-function renderStaff(){
-  const list = STAFF.filter(s=>s.role===activeRole);
-  const grid = $("#staffGrid");
-  if(!list.length){ grid.innerHTML = EMPTY; return; }
-  grid.innerHTML = list.map(s=>`
-    <div class="staff-card">
-      <div class="staff-photo">${s.photoUrl?`<img src="${esc(s.photoUrl)}" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ph&quot;>👤</span>'"/>`:'<span class="ph">👤</span>'}</div>
+let COMMITTEE = [];
+function staffCard(s){
+  return `
+    <div class="staff-card${s.isHead?" is-head":""}">
+      <div class="photo-wrap">
+        <div class="staff-photo">${s.photoUrl?`<img src="${esc(s.photoUrl)}" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ph&quot;>👤</span>'"/>`:'<span class="ph">👤</span>'}</div>
+        ${s.isHead?'<span class="head-badge">หัวหน้ากลุ่มงาน</span>':""}
+      </div>
       <div class="nm">${esc(s.name)}</div>
       <div class="pos">${esc(s.position)}</div>
       ${s.department?`<div class="dept">${esc(s.department)}</div>`:""}
       ${s.lineId?`<span class="line">LINE: ${esc(s.lineId)}</span>`:""}
-    </div>`).join("");
+    </div>`;
+}
+// หัวหน้ากลุ่มงานแสดงก่อนเสมอ
+function headsFirst(list){ return [...list].sort((a,b)=>(b.isHead?1:0)-(a.isHead?1:0)); }
+function staffSection(title, sub, list){
+  return `<div class="staff-group">
+      <div class="staff-group-title">${esc(title)}</div>
+      ${sub?`<div class="staff-group-sub">${esc(sub)}</div>`:""}
+      <div class="staff-grid">${headsFirst(list).map(staffCard).join("")}</div>
+    </div>`;
+}
+function renderStaff(){
+  const wrap = $("#staffGroups");
+  if(!wrap) return;
+  if(!STAFF.length){ wrap.innerHTML = EMPTY; return; }
+  let html = "";
+  // (1) ผู้บริหารสถานศึกษา — role = admin แสดงแยกด้านบนเสมอ
+  const execs = STAFF.filter(s=>s.role==="admin");
+  if(execs.length) html += staffSection("ผู้บริหารสถานศึกษา","คณะผู้บริหารโรงเรียน",execs);
+  // (2) แบ่งตาม 4 กลุ่มบริหารงาน (เฉพาะที่ไม่ใช่ผู้บริหาร)
+  const known = STAFF_GROUPS.map(g=>g.key);
+  STAFF_GROUPS.forEach(g=>{
+    const list = STAFF.filter(s=>s.role!=="admin" && s.group===g.key);
+    if(list.length) html += staffSection(g.label,g.sub,list);
+  });
+  // (3) ผู้ที่ยังไม่ได้ระบุกลุ่ม (เช่น ข้อมูลเก่า) แสดงไว้ท้ายสุด
+  const other = STAFF.filter(s=>s.role!=="admin" && !known.includes(s.group));
+  if(other.length) html += staffSection("บุคลากรอื่น ๆ","ยังไม่ได้ระบุกลุ่มบริหารงาน",other);
+  wrap.innerHTML = html || EMPTY;
 }
 db.collection("staff").onSnapshot(snap=>{
   STAFF = snap.docs.map(d=>({id:d.id,...d.data()}));
   renderStaff();
   renderAdminStaff();
-}, err=>{ $("#staffGrid").innerHTML=EMPTY; });
+  refreshDatalists();
+}, err=>{ const w=$("#staffGroups"); if(w) w.innerHTML=EMPTY; });
 
 /* ============================================================
    LOAD: committee (real-time, ordered)
@@ -1174,6 +1387,8 @@ db.collection("staff").onSnapshot(snap=>{
 db.collection("committee").onSnapshot(snap=>{
   let rows = snap.docs.map(d=>({id:d.id,...d.data()}));
   rows.sort((a,b)=>(a.order||0)-(b.order||0));
+  COMMITTEE = rows;
+  refreshDatalists();
   const tbl = $("#committeeTable");
   if(!rows.length){ tbl.innerHTML = EMPTY; }
   else{
@@ -1244,8 +1459,15 @@ async function loadContact(){
       : EMPTY;
 
     const map = $("#mapBox");
-    if(d.mapEmbedUrl){ map.innerHTML = `<iframe src="${esc(d.mapEmbedUrl)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`; }
-    else{ map.innerHTML = `<div class="ph">🗺️ ยังไม่มีแผนที่</div>`; }
+    const mapSrc = toMapEmbed(d.mapEmbedUrl);
+    if(mapSrc){
+      map.innerHTML = `<iframe src="${esc(mapSrc)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
+    }else if(d.mapEmbedUrl){
+      // มีค่าแต่ฝังไม่ได้ (มักเป็นลิงก์ย่อ goo.gl) → แนะนำวิธีที่ถูกต้อง
+      map.innerHTML = `<div class="ph">🗺️ ลิงก์นี้ฝังไม่ได้<br/><br/>กรุณาเปิด Google Maps → กด<b>แชร์</b> → แท็บ<b>ฝังแผนที่</b> → คัดลอกโค้ด &lt;iframe&gt; ทั้งก้อนมาวาง<br/>(อย่าใช้ลิงก์ย่อ maps.app.goo.gl)</div>`;
+    }else{
+      map.innerHTML = `<div class="ph">🗺️ ยังไม่มีแผนที่</div>`;
+    }
 
     // admin fill
     $("#c_address").value=d.address||""; $("#c_phone").value=d.phone||"";
@@ -1256,16 +1478,6 @@ async function loadContact(){
 
 /* ===== initial static loads ===== */
 loadHistory(); loadVMV(); loadIdentity(); loadContact();
-
-/* ============================================================
-   STAFF TABS
-   ============================================================ */
-$$(".tab").forEach(t=>t.addEventListener("click",()=>{
-  $$(".tab").forEach(x=>x.classList.remove("active"));
-  t.classList.add("active");
-  activeRole = t.dataset.role;
-  renderStaff();
-}));
 
 /* ============================================================
    NAV / SCROLL behaviour
@@ -1306,6 +1518,12 @@ overlay.addEventListener("click",e=>{ if(e.target===overlay) closeAdmin(); });
 function openAdmin(){
   overlay.classList.add("open");
   document.body.classList.add("no-scroll");
+  // ถ้าปลดล็อกแล้วในรอบนี้ → ข้ามหน้ากรอก PIN ไปเลย
+  if(adminUnlocked){
+    $("#pinGate").style.display="none";
+    $("#adminBody").classList.add("show");
+    return;
+  }
   // reset to PIN gate
   $("#pinGate").style.display="block";
   $("#adminBody").classList.remove("show");
@@ -1329,6 +1547,7 @@ function checkPin(){
   const entered = pinInputs.map(p=>p.value).join("");
   const correct = SETTINGS.adminPin || "1234"; // default if unset
   if(entered === String(correct)){
+    adminUnlocked = true;   // จดจำไว้จนกว่าจะรีโหลด/ปิดหน้า
     $("#pinGate").style.display="none";
     $("#adminBody").classList.add("show");
   }else{
@@ -1366,7 +1585,8 @@ $("#addTagBtn").addEventListener("click",()=>{
 /* ============================================================
    ADMIN: SAVE general settings
    ============================================================ */
-$("#saveGeneral").addEventListener("click",async ()=>{
+$("#saveGeneral").addEventListener("click",async (e)=>{
+  const btn = e.currentTarget;
   const data = {
     schoolName: $("#f_schoolName").value.trim(),
     tagline: $("#f_tagline").value.trim(),
@@ -1377,18 +1597,22 @@ $("#saveGeneral").addEventListener("click",async ()=>{
     emblemUrl: $("#f_emblemUrl").value.trim(),
     heroTags: heroTagsDraft
   };
+  btnLoading(btn,true); SW.loading("กำลังบันทึกการตั้งค่า…");
   try{
     await db.collection("settings").doc("main").set(data,{merge:true});
-    toast("บันทึกแล้ว ✓");
-  }catch(e){ toast("เกิดข้อผิดพลาด: "+e.message); }
+    SW.ok("บันทึกแล้ว");
+  }catch(err){ SW.err("บันทึกไม่สำเร็จ", err.message); }
+  finally{ btnLoading(btn,false); }
 });
 
 /* ============================================================
    ADMIN: links CRUD
    ============================================================ */
-$("#addLink").addEventListener("click",async ()=>{
+$("#addLink").addEventListener("click",async (e)=>{
+  const btn = e.currentTarget;
   const label=$("#l_label").value.trim();
-  if(!label) return toast("กรุณากรอกชื่อลิงก์");
+  if(!label) return SW.err("กรุณากรอกชื่อลิงก์");
+  btnLoading(btn,true); SW.loading("กำลังเพิ่มลิงก์…");
   try{
     await db.collection("links").add({
       label, icon:$("#l_icon").value.trim()||"🔗",
@@ -1398,63 +1622,122 @@ $("#addLink").addEventListener("click",async ()=>{
     });
     $("#l_label").value=""; $("#l_icon").value=""; $("#l_url").value="";
     $("#l_imageUrl").value=""; $("#l_imagePreview").innerHTML="";
-    toast("บันทึกแล้ว ✓");
-  }catch(e){ toast("ผิดพลาด: "+e.message); }
+    SW.ok("บันทึกแล้ว");
+  }catch(err){ SW.err("บันทึกไม่สำเร็จ", err.message); }
+  finally{ btnLoading(btn,false); }
 });
 window.toggleLink = async (id,cur)=>{
-  try{ await db.collection("links").doc(id).update({visible:!cur}); toast("บันทึกแล้ว ✓"); }catch(e){ toast(e.message); }
+  try{ await db.collection("links").doc(id).update({visible:!cur}); SW.ok(cur?"ซ่อนแล้ว":"แสดงแล้ว"); }
+  catch(e){ SW.err("ไม่สำเร็จ", e.message); }
 };
 
 /* ============================================================
-   ADMIN: staff CRUD
+   ADMIN: staff CRUD (เพิ่ม / แก้ไข / ลบ)
    ============================================================ */
+let editingStaffId = null;
+
 function renderAdminStaff(){
   const al = $("#adminStaffList");
   if(!al) return;
   const roleTxt={admin:"ผู้บริหาร",teacher:"ครู",support:"บุคลากร"};
   al.innerHTML = STAFF.length? STAFF.map(s=>`
-    <div class="admin-item">
+    <div class="admin-item${editingStaffId===s.id?" editing":""}">
       ${s.photoUrl?`<img src="${esc(s.photoUrl)}" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;av&quot;>👤</div>'"/>`:'<div class="av">👤</div>'}
-      <div class="info"><b>${esc(s.name)}</b><small>${esc(s.position)} · ${roleTxt[s.role]||s.role||""}</small></div>
-      <div class="acts"><button class="btn btn-danger btn-sm" onclick="delDoc('staff','${s.id}')">ลบ</button></div>
+      <div class="info"><b>${esc(s.name)}${s.isHead?' <span style="color:var(--accent)">★ หัวหน้า</span>':''}</b><small>${esc(s.position)} · ${roleTxt[s.role]||s.role||""}${s.role!=="admin"&&GROUP_LABEL[s.group]?" · "+GROUP_LABEL[s.group]:""}</small></div>
+      <div class="acts">
+        <button class="btn btn-ghost btn-sm" onclick="editStaff('${s.id}')">แก้ไข</button>
+        <button class="btn btn-danger btn-sm" onclick="delDoc('staff','${s.id}')">ลบ</button>
+      </div>
     </div>`).join("") : EMPTY;
 }
-$("#addStaff").addEventListener("click",async ()=>{
+
+/* โหลดข้อมูลคนที่เลือกเข้าฟอร์มเพื่อแก้ไข */
+window.editStaff = (id)=>{
+  const s = STAFF.find(x=>x.id===id);
+  if(!s) return;
+  editingStaffId = id;
+  $("#s_name").value = s.name||"";
+  $("#s_position").value = s.position||"";
+  $("#s_department").value = s.department||"";
+  $("#s_role").value = s.role||"teacher";
+  $("#s_group").value = s.group||"academic";
+  $("#s_photoUrl").value = s.photoUrl||"";
+  $("#s_lineId").value = s.lineId||"";
+  $("#s_isHead").checked = !!s.isHead;
+  $("#s_photoPreview").innerHTML = s.photoUrl
+    ? `<img src="${esc(s.photoUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none'"/>` : "";
+  // ปรับ UI เป็นโหมดแก้ไข
+  $("#addStaff").textContent = "บันทึกการแก้ไข";
+  $("#cancelStaffEdit").style.display = "inline-flex";
+  $("#staffEditBadge").style.display = "inline";
+  renderAdminStaff();
+  $("#s_name").scrollIntoView({behavior:"smooth", block:"center"});
+  $("#s_name").focus();
+};
+
+function resetStaffForm(){
+  editingStaffId = null;
+  ["s_name","s_position","s_department","s_photoUrl","s_lineId"].forEach(id=>$("#"+id).value="");
+  $("#s_role").value = "admin"; $("#s_group").value = "academic";
+  $("#s_isHead").checked = false;
+  $("#s_photoPreview").innerHTML = "";
+  $("#addStaff").textContent = "เพิ่มบุคลากร";
+  $("#cancelStaffEdit").style.display = "none";
+  $("#staffEditBadge").style.display = "none";
+  renderAdminStaff();
+}
+$("#cancelStaffEdit").addEventListener("click", resetStaffForm);
+
+$("#addStaff").addEventListener("click",async (e)=>{
+  const btn = e.currentTarget;
   const name=$("#s_name").value.trim();
-  if(!name) return toast("กรุณากรอกชื่อ");
+  if(!name) return SW.err("กรุณากรอกชื่อ");
+  const data = {
+    name, position:$("#s_position").value.trim(),
+    department:$("#s_department").value.trim(),
+    role:$("#s_role").value, group:$("#s_group").value,
+    isHead:$("#s_isHead").checked,
+    photoUrl:$("#s_photoUrl").value.trim(),
+    lineId:$("#s_lineId").value.trim()
+  };
+  btnLoading(btn,true); SW.loading(editingStaffId?"กำลังบันทึกการแก้ไข…":"กำลังเพิ่มบุคลากร…");
   try{
-    await db.collection("staff").add({
-      name, position:$("#s_position").value.trim(),
-      department:$("#s_department").value.trim(),
-      role:$("#s_role").value, photoUrl:$("#s_photoUrl").value.trim(),
-      lineId:$("#s_lineId").value.trim()
-    });
-    ["s_name","s_position","s_department","s_photoUrl","s_lineId"].forEach(id=>$("#"+id).value="");
-    $("#s_photoPreview").innerHTML="";
-    toast("บันทึกแล้ว ✓");
-  }catch(e){ toast("ผิดพลาด: "+e.message); }
+    if(editingStaffId){
+      await db.collection("staff").doc(editingStaffId).update(data);
+    }else{
+      await db.collection("staff").add(data);
+    }
+    resetStaffForm();
+    SW.ok("บันทึกแล้ว");
+  }catch(err){ SW.err("บันทึกไม่สำเร็จ", err.message); }
+  finally{ btnLoading(btn,false); }
 });
 
 /* ============================================================
    ADMIN: committee CRUD
    ============================================================ */
-$("#addCommittee").addEventListener("click",async ()=>{
+$("#addCommittee").addEventListener("click",async (e)=>{
+  const btn = e.currentTarget;
   const name=$("#m_name").value.trim();
-  if(!name) return toast("กรุณากรอกชื่อ");
+  if(!name) return SW.err("กรุณากรอกชื่อ");
+  btnLoading(btn,true); SW.loading("กำลังเพิ่มกรรมการ…");
   try{
     await db.collection("committee").add({
       name, position:$("#m_position").value.trim(),
       order:Number($("#m_order").value)||1
     });
     $("#m_name").value=""; $("#m_position").value="";
-    toast("บันทึกแล้ว ✓");
-  }catch(e){ toast("ผิดพลาด: "+e.message); }
+    SW.ok("บันทึกแล้ว");
+  }catch(err){ SW.err("บันทึกไม่สำเร็จ", err.message); }
+  finally{ btnLoading(btn,false); }
 });
 
 /* ============================================================
    ADMIN: SAVE all page content
    ============================================================ */
-$("#saveContent").addEventListener("click",async ()=>{
+$("#saveContent").addEventListener("click",async (e)=>{
+  const btn = e.currentTarget;
+  btnLoading(btn,true); SW.loading("กำลังบันทึกเนื้อหา…");
   try{
     const batch = db.batch();
     batch.set(db.collection("content").doc("history"),{
@@ -1480,21 +1763,31 @@ $("#saveContent").addEventListener("click",async ()=>{
     await batch.commit();
     // refresh static sections
     loadHistory(); loadVMV(); loadIdentity(); loadContact();
-    toast("บันทึกแล้ว ✓");
-  }catch(e){ toast("ผิดพลาด: "+e.message); }
+    SW.ok("บันทึกแล้ว");
+  }catch(err){ SW.err("บันทึกไม่สำเร็จ", err.message); }
+  finally{ btnLoading(btn,false); }
 });
 
 /* ============================================================
    shared delete
    ============================================================ */
 window.delDoc = async (col,id)=>{
-  if(!confirm("ยืนยันการลบรายการนี้?")) return;
-  try{ await db.collection(col).doc(id).delete(); toast("ลบแล้ว ✓"); }catch(e){ toast(e.message); }
+  const ok = await SW.confirm("ยืนยันการลบ?", "เมื่อลบแล้วจะไม่สามารถกู้คืนได้");
+  if(!ok) return;
+  SW.loading("กำลังลบ…");
+  try{
+    await db.collection(col).doc(id).delete();
+    if(col==="staff" && editingStaffId===id) resetStaffForm();
+    SW.ok("ลบแล้ว");
+  }catch(e){ SW.err("ลบไม่สำเร็จ", e.message); }
 };
 
 /* esc key closes overlays */
 document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"){ closeAdmin(); closeDrawer(); }
+  if(e.key==="Escape"){
+    if(window.Swal && Swal.isVisible()) return; // ปล่อยให้ SweetAlert จัดการเอง
+    closeAdmin(); closeDrawer();
+  }
 });
 </script>
 </body>
