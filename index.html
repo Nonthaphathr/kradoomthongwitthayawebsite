@@ -11,6 +11,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,900&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Noto+Serif+Thai:wght@500;600;700&display=swap" rel="stylesheet" />
 
+<!-- Cropper.js (ครอป/แก้ไขรูป) -->
+<link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" rel="stylesheet" />
+
 <style>
 /* ============================================================
    DESIGN TOKENS
@@ -325,6 +328,15 @@ section{padding:110px 0;position:relative}
   border-color:var(--accent);
   box-shadow:0 0 0 4px var(--bg),0 0 0 6px var(--accent),0 10px 30px -10px var(--accent-glow);
 }
+/* ลำดับความเด่น: ผอ. = รอง ผอ. (เท่ากัน) > หัวหน้ากลุ่ม > ครู */
+.staff-card.is-deputy .photo-wrap,
+.staff-card.is-director .photo-wrap{width:200px}
+.staff-card.is-deputy .staff-photo,
+.staff-card.is-director .staff-photo{
+  width:200px;height:200px;
+  border-color:var(--accent);
+  box-shadow:0 0 0 5px var(--bg),0 0 0 8px var(--accent),0 18px 46px -14px var(--accent-glow);
+}
 .head-badge{
   position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);
   background:var(--accent);color:#160a00;
@@ -534,6 +546,25 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
 .swal2-popup{border:1px solid var(--line-2)!important;border-radius:var(--r-lg)!important;font-family:var(--thai)!important}
 .swal2-title{font-weight:800!important}
 .swal2-styled.swal2-confirm{font-weight:700!important}
+/* Image crop modal */
+.crop-overlay{
+  position:fixed;inset:0;z-index:480;background:rgba(0,0,0,.82);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.crop-overlay.open{display:flex}
+.crop-modal{
+  background:var(--bg-2);border:1px solid var(--line-2);border-radius:var(--r-lg);
+  width:100%;max-width:640px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 40px 100px -20px rgba(0,0,0,.9);
+}
+.crop-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
+.crop-head h3{font-size:1.15rem;font-weight:800}
+.crop-head .x{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);display:grid;place-items:center;font-size:1.1rem;transition:.2s}
+.crop-head .x:hover{background:#ff3b3b}
+.crop-stage{padding:16px 22px;background:var(--bg);overflow:hidden}
+.crop-stage img{display:block;max-width:100%;max-height:56vh;margin:0 auto}
+.crop-tools{display:flex;gap:8px;align-items:center;padding:14px 22px;border-top:1px solid var(--line);flex-wrap:wrap}
+.cropper-view-box,.cropper-face{border-radius:0}
 
 .tag-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .tag-pill{display:inline-flex;align-items:center;gap:8px;background:var(--bg-card);border:1px solid var(--line);
@@ -858,9 +889,11 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
               <div class="field"><label>กลุ่มสาระ/ฝ่าย</label><input id="s_department" list="dl_department" autocomplete="off" /></div>
               <div class="field"><label>ประเภท (role)</label>
                 <select id="s_role">
-                  <option value="admin">ผู้บริหาร</option>
+                  <option value="director">ผู้บริหาร (ผอ.)</option>
+                  <option value="deputy">ผู้บริหาร (รอง ผอ.)</option>
                   <option value="teacher">ครู</option>
                   <option value="support">บุคลากร</option>
+                  <option value="admin">ผู้บริหาร (ทั่วไป/เดิม)</option>
                 </select>
               </div>
             </div>
@@ -954,6 +987,26 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
   </div>
 </div>
 
+<!-- IMAGE CROP MODAL -->
+<div class="crop-overlay" id="cropOverlay">
+  <div class="crop-modal">
+    <div class="crop-head">
+      <h3>✂️ ครอป / แก้ไขรูป</h3>
+      <button class="x" id="cropCancelX">✕</button>
+    </div>
+    <div class="crop-stage"><img id="cropImg" alt="" /></div>
+    <div class="crop-tools">
+      <button class="btn btn-ghost btn-sm" id="cropRotate">↻ หมุน 90°</button>
+      <button class="btn btn-ghost btn-sm" id="cropZoomIn">＋ ขยาย</button>
+      <button class="btn btn-ghost btn-sm" id="cropZoomOut">－ ย่อ</button>
+      <button class="btn btn-ghost btn-sm" id="cropReset">รีเซ็ต</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" id="cropCancel">ยกเลิก</button>
+      <button class="btn btn-primary btn-sm" id="cropConfirm">ใช้รูปนี้</button>
+    </div>
+  </div>
+</div>
+
 <!-- DATALISTS (autofill suggestions from existing data) -->
 <datalist id="dl_name"></datalist>
 <datalist id="dl_position"></datalist>
@@ -969,6 +1022,8 @@ footer .copy{color:var(--txt-faint);font-size:.82rem;margin-top:24px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <!-- SweetAlert2 (popup/loading modal) -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Cropper.js -->
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
 <script>
 /* ===== Firebase init ===== */
@@ -1067,6 +1122,11 @@ const STAFF_GROUPS = [
 ];
 const GROUP_LABEL = Object.fromEntries(STAFF_GROUPS.map(g=>[g.key,g.label]));
 
+/* role ผู้บริหารที่แสดงในกลุ่ม "ผู้บริหารสถานศึกษา" และลำดับการแสดง (เลขน้อย = ขึ้นก่อน)
+   admin = ของเดิม (ผู้บริหารทั่วไป) เพื่อความเข้ากันได้กับข้อมูลเก่า */
+const EXEC_ORDER = { director:0, deputy:1, admin:2 };
+const isExec = r => Object.prototype.hasOwnProperty.call(EXEC_ORDER, r);
+
 /* แปลงค่าที่ผู้ใช้วางมาให้เป็น URL ที่ฝัง <iframe> ได้จริง
    รองรับ: โค้ด <iframe...> ทั้งก้อน, ลิงก์ embed, ลิงก์ /maps/place,
            พิกัด @lat,lng, หรือข้อความ/ที่อยู่ธรรมดา */
@@ -1151,8 +1211,54 @@ async function uploadToDrive(file){
   }
   throw new Error("อัปโหลดช้าหรือไม่สำเร็จ — ตรวจว่า GAS เป็นเวอร์ชันที่รองรับ ?key= และลองใหม่");
 }
-/* wire a [file input] + [url text input] + [preview] trio */
-function wireUpload(fileId, urlId, previewId){
+/* ===== Image cropper (Cropper.js) — ครอป/แก้ไขรูปก่อนอัปโหลด ===== */
+function openCropper(file, aspect){
+  return new Promise((resolve)=>{
+    if(!window.Cropper){ resolve(file); return; } // ไม่มีไลบรารี → ข้าม ใช้ไฟล์เดิม
+    const overlay = $("#cropOverlay"), img = $("#cropImg");
+    const url = URL.createObjectURL(file);
+    let cropper = null, done = false;
+    const cleanup = (result)=>{
+      if(done) return; done = true;
+      try{ cropper && cropper.destroy(); }catch(e){}
+      cropper = null;
+      URL.revokeObjectURL(url);
+      overlay.classList.remove("open");
+      ["cropConfirm","cropCancel","cropCancelX","cropRotate","cropZoomIn","cropZoomOut","cropReset"]
+        .forEach(id=>{ const el=$("#"+id); if(el) el.onclick=null; });
+      img.onload = null; img.src = "";
+      resolve(result);
+    };
+    img.onload = ()=>{
+      try{ cropper && cropper.destroy(); }catch(e){}
+      cropper = new Cropper(img, {
+        aspectRatio: aspect || NaN, viewMode:1, autoCropArea:1,
+        background:false, dragMode:"move", responsive:true,
+      });
+    };
+    img.src = url;
+    overlay.classList.add("open");
+    $("#cropRotate").onclick  = ()=> cropper && cropper.rotate(90);
+    $("#cropZoomIn").onclick  = ()=> cropper && cropper.zoom(0.1);
+    $("#cropZoomOut").onclick = ()=> cropper && cropper.zoom(-0.1);
+    $("#cropReset").onclick   = ()=> cropper && cropper.reset();
+    $("#cropCancel").onclick  = ()=> cleanup(null);
+    $("#cropCancelX").onclick = ()=> cleanup(null);
+    $("#cropConfirm").onclick = ()=>{
+      if(!cropper){ cleanup(null); return; }
+      const canvas = cropper.getCroppedCanvas({ maxWidth:1600, maxHeight:1600, imageSmoothingQuality:"high" });
+      const isPng = (file.type||"").includes("png");
+      canvas.toBlob((blob)=>{
+        if(!blob){ cleanup(null); return; }
+        const name = (file.name||"image").replace(/\.[^.]+$/,"") + (isPng?".png":".jpg");
+        cleanup(new File([blob], name, { type: blob.type }));
+      }, isPng ? "image/png" : "image/jpeg", 0.92);
+    };
+  });
+}
+
+/* wire a [file input] + [url text input] + [preview] trio (aspect = สัดส่วนกรอบครอป) */
+function wireUpload(fileId, urlId, previewId, aspect){
   const fileInp = $("#"+fileId), urlInp = $("#"+urlId), prev = $("#"+previewId);
   if(!fileInp) return;
   urlInp.addEventListener("input",()=>{
@@ -1161,20 +1267,24 @@ function wireUpload(fileId, urlId, previewId){
   });
   fileInp.addEventListener("change",async ()=>{
     const f = fileInp.files[0]; if(!f) return;
+    fileInp.value = ""; // เคลียร์เพื่อให้เลือกไฟล์เดิมซ้ำได้
+    // เปิดหน้าต่างครอปก่อน
+    const cropped = await openCropper(f, aspect);
+    if(!cropped) return; // ผู้ใช้กดยกเลิก
     const btn = fileInp.closest(".upload-btn");
     btn && btn.classList.add("loading");
     SW.loading("กำลังอัปโหลดรูป… (อาจใช้เวลาสองสามวินาที)");
     try{
-      const url = await uploadToDrive(f);
+      const url = await uploadToDrive(cropped);
       urlInp.value = url;
       prev.innerHTML = `<img src="${url}" referrerpolicy="no-referrer" onerror="this.style.display='none'"/>`;
       SW.ok("อัปโหลดรูปแล้ว");
     }catch(e){ SW.err("อัปโหลดไม่สำเร็จ", e.message); }
-    finally{ btn && btn.classList.remove("loading"); fileInp.value=""; }
+    finally{ btn && btn.classList.remove("loading"); }
   });
 }
-wireUpload("s_photoFile","s_photoUrl","s_photoPreview");
-wireUpload("l_imageFile","l_imageUrl","l_imagePreview");
+wireUpload("s_photoFile","s_photoUrl","s_photoPreview", 1);   // รูปบุคลากร = สี่เหลี่ยมจัตุรัส (แสดงเป็นวงกลม)
+wireUpload("l_imageFile","l_imageUrl","l_imagePreview", NaN); // โลโก้กลุ่มงาน = อิสระ
 
 /* ============================================================
    LOAD: SETTINGS (real-time)
@@ -1334,11 +1444,16 @@ async function loadIdentity(){
 let STAFF = [];
 let COMMITTEE = [];
 function staffCard(s){
+  // ขนาดภาพตามบทบาท: ผอ. > รอง ผอ. > หัวหน้ากลุ่ม > ปกติ
+  const sizeClass = s.role==="director" ? "is-director"
+                  : s.role==="deputy"   ? "is-deputy"
+                  : (s.isHead ? "is-head" : "");
+  const showHeadBadge = s.isHead && s.role!=="director" && s.role!=="deputy";
   return `
-    <div class="staff-card${s.isHead?" is-head":""}">
+    <div class="staff-card${sizeClass?" "+sizeClass:""}">
       <div class="photo-wrap">
         <div class="staff-photo">${s.photoUrl?`<img src="${esc(s.photoUrl)}" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ph&quot;>👤</span>'"/>`:'<span class="ph">👤</span>'}</div>
-        ${s.isHead?'<span class="head-badge">หัวหน้ากลุ่มงาน</span>':""}
+        ${showHeadBadge?'<span class="head-badge">หัวหน้ากลุ่มงาน</span>':""}
       </div>
       <div class="nm">${esc(s.name)}</div>
       <div class="pos">${esc(s.position)}</div>
@@ -1348,11 +1463,12 @@ function staffCard(s){
 }
 // หัวหน้ากลุ่มงานแสดงก่อนเสมอ
 function headsFirst(list){ return [...list].sort((a,b)=>(b.isHead?1:0)-(a.isHead?1:0)); }
-function staffSection(title, sub, list){
+function staffSection(title, sub, list, keepOrder){
+  const arr = keepOrder ? list : headsFirst(list);
   return `<div class="staff-group">
       <div class="staff-group-title">${esc(title)}</div>
       ${sub?`<div class="staff-group-sub">${esc(sub)}</div>`:""}
-      <div class="staff-grid">${headsFirst(list).map(staffCard).join("")}</div>
+      <div class="staff-grid">${arr.map(staffCard).join("")}</div>
     </div>`;
 }
 function renderStaff(){
@@ -1360,17 +1476,18 @@ function renderStaff(){
   if(!wrap) return;
   if(!STAFF.length){ wrap.innerHTML = EMPTY; return; }
   let html = "";
-  // (1) ผู้บริหารสถานศึกษา — role = admin แสดงแยกด้านบนเสมอ
-  const execs = STAFF.filter(s=>s.role==="admin");
-  if(execs.length) html += staffSection("ผู้บริหารสถานศึกษา","คณะผู้บริหารโรงเรียน",execs);
+  // (1) ผู้บริหารสถานศึกษา — ผอ. ขึ้นก่อน ตามด้วยรอง ผอ. แล้วผู้บริหารทั่วไป
+  const execs = STAFF.filter(s=>isExec(s.role))
+    .sort((a,b)=>(EXEC_ORDER[a.role]-EXEC_ORDER[b.role]));
+  if(execs.length) html += staffSection("ผู้บริหารสถานศึกษา","คณะผู้บริหารโรงเรียน",execs,true);
   // (2) แบ่งตาม 4 กลุ่มบริหารงาน (เฉพาะที่ไม่ใช่ผู้บริหาร)
   const known = STAFF_GROUPS.map(g=>g.key);
   STAFF_GROUPS.forEach(g=>{
-    const list = STAFF.filter(s=>s.role!=="admin" && s.group===g.key);
+    const list = STAFF.filter(s=>!isExec(s.role) && s.group===g.key);
     if(list.length) html += staffSection(g.label,g.sub,list);
   });
   // (3) ผู้ที่ยังไม่ได้ระบุกลุ่ม (เช่น ข้อมูลเก่า) แสดงไว้ท้ายสุด
-  const other = STAFF.filter(s=>s.role!=="admin" && !known.includes(s.group));
+  const other = STAFF.filter(s=>!isExec(s.role) && !known.includes(s.group));
   if(other.length) html += staffSection("บุคลากรอื่น ๆ","ยังไม่ได้ระบุกลุ่มบริหารงาน",other);
   wrap.innerHTML = html || EMPTY;
 }
@@ -1639,11 +1756,11 @@ let editingStaffId = null;
 function renderAdminStaff(){
   const al = $("#adminStaffList");
   if(!al) return;
-  const roleTxt={admin:"ผู้บริหาร",teacher:"ครู",support:"บุคลากร"};
+  const roleTxt={director:"ผู้บริหาร (ผอ.)",deputy:"ผู้บริหาร (รอง ผอ.)",admin:"ผู้บริหาร",teacher:"ครู",support:"บุคลากร"};
   al.innerHTML = STAFF.length? STAFF.map(s=>`
     <div class="admin-item${editingStaffId===s.id?" editing":""}">
       ${s.photoUrl?`<img src="${esc(s.photoUrl)}" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;av&quot;>👤</div>'"/>`:'<div class="av">👤</div>'}
-      <div class="info"><b>${esc(s.name)}${s.isHead?' <span style="color:var(--accent)">★ หัวหน้า</span>':''}</b><small>${esc(s.position)} · ${roleTxt[s.role]||s.role||""}${s.role!=="admin"&&GROUP_LABEL[s.group]?" · "+GROUP_LABEL[s.group]:""}</small></div>
+      <div class="info"><b>${esc(s.name)}${s.isHead&&!isExec(s.role)?' <span style="color:var(--accent)">★ หัวหน้า</span>':''}</b><small>${esc(s.position)} · ${roleTxt[s.role]||s.role||""}${!isExec(s.role)&&GROUP_LABEL[s.group]?" · "+GROUP_LABEL[s.group]:""}</small></div>
       <div class="acts">
         <button class="btn btn-ghost btn-sm" onclick="editStaff('${s.id}')">แก้ไข</button>
         <button class="btn btn-danger btn-sm" onclick="delDoc('staff','${s.id}')">ลบ</button>
@@ -1678,7 +1795,7 @@ window.editStaff = (id)=>{
 function resetStaffForm(){
   editingStaffId = null;
   ["s_name","s_position","s_department","s_photoUrl","s_lineId"].forEach(id=>$("#"+id).value="");
-  $("#s_role").value = "admin"; $("#s_group").value = "academic";
+  $("#s_role").value = "teacher"; $("#s_group").value = "academic";
   $("#s_isHead").checked = false;
   $("#s_photoPreview").innerHTML = "";
   $("#addStaff").textContent = "เพิ่มบุคลากร";
@@ -1786,6 +1903,7 @@ window.delDoc = async (col,id)=>{
 document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){
     if(window.Swal && Swal.isVisible()) return; // ปล่อยให้ SweetAlert จัดการเอง
+    if($("#cropOverlay").classList.contains("open")) return; // กำลังครอปรูปอยู่
     closeAdmin(); closeDrawer();
   }
 });
