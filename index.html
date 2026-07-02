@@ -801,11 +801,47 @@ body.pa-mode{overflow:hidden}
 .pa-cm-member{display:inline-flex;flex-direction:column;gap:1px;
   background:rgba(10,10,10,.5);border:1px solid var(--line-2);border-radius:12px;padding:8px 14px}
 .pa-cm-mname{font-weight:700;font-size:.92rem;color:#fff}
-.pa-cm-mname::before{content:"⚖️ ";}
 .pa-cm-mpos{font-size:.76rem;color:var(--accent)}
 .pa-group-count{flex-shrink:0;font-weight:800;font-size:.9rem;color:#160a00;
   background:linear-gradient(135deg,var(--accent),#ff8a55);padding:8px 16px;border-radius:999px}
 .pa-group-head.rest .pa-group-count{background:#3a3a3a;color:var(--txt)}
+
+/* ---- Landing: เลือกชุดกรรมการ ---- */
+.pa-select-intro{margin:6px 4px 20px}
+.pa-select-intro h2{font-size:1.5rem;font-weight:800}
+.pa-select-intro p{color:var(--txt-faint);font-size:.92rem;margin-top:4px}
+.pa-select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
+.pa-select-card{position:relative;overflow:hidden;text-align:left;display:flex;flex-direction:column;gap:12px;
+  padding:22px 22px 20px;border-radius:20px;color:var(--txt);cursor:pointer;width:100%;
+  background:linear-gradient(160deg, rgba(255,107,43,.13), rgba(20,20,20,.6));
+  border:1px solid var(--line-2);transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s, border-color .3s;
+  animation:paCardIn .5s both}
+.pa-select-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(180deg,var(--accent),#ff8a55)}
+.pa-select-card:hover{transform:translateY(-7px);border-color:rgba(255,107,43,.55);
+  box-shadow:0 26px 62px -24px rgba(255,107,43,.6)}
+.pa-select-card.rest{background:linear-gradient(160deg, rgba(255,255,255,.05), rgba(20,20,20,.5))}
+.pa-select-card.rest::before{background:#555}
+.pa-select-badge{align-self:flex-start;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);background:rgba(255,107,43,.14);border:1px solid rgba(255,107,43,.4);padding:5px 12px;border-radius:999px}
+.pa-select-card.rest .pa-select-badge{color:var(--txt-dim);background:rgba(255,255,255,.05);border-color:var(--line-2)}
+.pa-select-card h3{font-size:1.3rem;font-weight:800;line-height:1.25}
+.pa-select-members{display:flex;flex-direction:column;gap:6px;margin:0;list-style:none}
+.pa-select-members li{display:flex;flex-direction:column;gap:2px;
+  padding:9px 13px;border-radius:10px;background:rgba(10,10,10,.42);border:1px solid var(--line)}
+.pa-select-members li span{font-weight:700;font-size:.92rem;color:#fff}
+.pa-select-members li em{font-style:normal;font-size:.78rem;color:var(--accent)}
+.pa-select-members li.none{color:var(--txt-faint);font-size:.84rem}
+.pa-select-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:6px}
+.pa-select-count{font-weight:800;font-size:.85rem;color:#160a00;
+  background:linear-gradient(135deg,var(--accent),#ff8a55);padding:7px 14px;border-radius:999px}
+.pa-select-card.rest .pa-select-count{background:#3a3a3a;color:var(--txt)}
+.pa-select-go{font-weight:800;color:var(--accent);font-size:.9rem;transition:transform .2s}
+.pa-select-card:hover .pa-select-go{transform:translateX(4px)}
+.pa-backsel{display:inline-flex;align-items:center;gap:8px;margin-bottom:18px;padding:10px 18px;border-radius:999px;
+  font-weight:700;font-size:.9rem;color:var(--txt);background:rgba(20,20,20,.72);border:1px solid var(--line-2);
+  backdrop-filter:blur(8px);transition:.2s}
+.pa-backsel:hover{border-color:var(--accent);color:var(--accent);transform:translateX(-3px)}
 
 /* ============ ผู้ดูแล: จัดการชุดกรรมการ ============ */
 .cm-member-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px}
@@ -2317,6 +2353,7 @@ let paEditId = null;
 let PA_COMMITTEES = [];
 let cmMembersDraft = [];
 let cmEditId = null;
+let paSelectedCommittee = null;   // null = หน้าเลือกชุด, id/"__rest__" = ดูรายละเอียด
 
 /* เติมตัวเลือกปีงบประมาณ (พ.ศ.) รอบ ๆ ปีปัจจุบัน */
 function paFillYears(sel){
@@ -2489,27 +2526,71 @@ function renderPaCards(){
   const cnt=$("#paCount");
   const committeeMode = PA_SETTINGS.paCommitteeMode===true;
   grid.classList.toggle("grouped", committeeMode);
+  if(cnt) cnt.textContent=`${PA_CARDS.length} เว็บไซต์`;
+  if(committeeMode){ renderPaCommitteeView(grid); return; }
+  // โหมดปกติ: แสดงการ์ดทั้งหมดแบบเรียบ
+  paSelectedCommittee=null;
+  { const b=$("#paBack"); if(b) b.style.display=""; }
   if(!PA_CARDS.length){
     grid.innerHTML=`<div class="pa-empty"><span class="em">🗂️</span>ยังไม่มีเว็บไซต์ประเมิน PA<br>กดปุ่ม “＋ เพิ่มเว็บ” มุมขวาล่างเพื่อเริ่มต้น</div>`;
-    if(cnt) cnt.textContent="0 เว็บไซต์";
     return;
   }
-  if(cnt) cnt.textContent=`${PA_CARDS.length} เว็บไซต์`;
-  if(committeeMode){
-    const assigned=new Set();
-    let html="";
-    PA_COMMITTEES.forEach(cm=>{
-      const cards=(cm.teacherIds||[]).map(id=>PA_CARDS.find(c=>c.id===id)).filter(Boolean);
-      cards.forEach(c=>assigned.add(c.id));
-      html+=paGroupHTML(cm, cards);
-    });
-    const rest=PA_CARDS.filter(c=>!assigned.has(c.id));
-    if(rest.length) html+=paGroupHTML(null, rest);
-    grid.innerHTML=html;
-  }else{
-    grid.innerHTML = PA_CARDS.map((c,i)=>paCardHTML(c,i)).join("");
-  }
+  grid.innerHTML = PA_CARDS.map((c,i)=>paCardHTML(c,i)).join("");
 }
+
+/* โหมดกรรมการ: หน้าเลือกชุด (landing) หรือหน้ารายละเอียดของชุดที่เลือก */
+function renderPaCommitteeView(grid){
+  // ถ้าชุดที่เลือกถูกลบไปแล้ว → กลับหน้าเลือก
+  if(paSelectedCommittee && paSelectedCommittee!=="__rest__" && !PA_COMMITTEES.some(c=>c.id===paSelectedCommittee)){
+    paSelectedCommittee=null;
+  }
+  const onDetail = paSelectedCommittee!==null;
+  // อยู่หน้ารายละเอียดชุด → ซ่อนปุ่ม “กลับหน้าหลัก” (ใช้ปุ่มกลับหน้าเลือกชุดแทน)
+  const back=$("#paBack"); if(back) back.style.display = onDetail ? "none" : "";
+  grid.innerHTML = onDetail ? paDetailHTML(paSelectedCommittee) : paLandingHTML();
+}
+function paLandingHTML(){
+  const assigned=new Set();
+  PA_COMMITTEES.forEach(cm=>(cm.teacherIds||[]).forEach(id=>assigned.add(id)));
+  const restCount = PA_CARDS.filter(c=>!assigned.has(c.id)).length;
+  if(!PA_COMMITTEES.length && !restCount){
+    return `<div class="pa-empty"><span class="em">👥</span>ยังไม่มีชุดกรรมการ<br>ไปที่แผงผู้ดูแล → ประเมิน PA เพื่อสร้างชุดกรรมการ</div>`;
+  }
+  let cards = PA_COMMITTEES.map((cm,i)=>{
+    const count=(cm.teacherIds||[]).filter(id=>PA_CARDS.some(c=>c.id===id)).length;
+    const members=(cm.members||[]).map(m=>`<li><span>${esc(m.name||"")}</span>${m.position?`<em>${esc(m.position)}</em>`:""}</li>`).join("");
+    return `<button class="pa-select-card" style="animation-delay:${i*60}ms" onclick="paSelectGroup('${cm.id}')">
+      <span class="pa-select-badge">👥 ชุดกรรมการ</span>
+      <h3>${esc(cm.name||"ชุดกรรมการ")}</h3>
+      <ul class="pa-select-members">${members||'<li class="none">ยังไม่ได้ระบุกรรมการ</li>'}</ul>
+      <div class="pa-select-foot"><span class="pa-select-count">ประเมิน ${count} คน</span><span class="pa-select-go">เลือก →</span></div>
+    </button>`;
+  }).join("");
+  if(restCount){
+    cards += `<button class="pa-select-card rest" onclick="paSelectGroup('__rest__')">
+      <span class="pa-select-badge">⚠️ ยังไม่จัดชุด</span>
+      <h3>ยังไม่ได้จัดชุดกรรมการ</h3>
+      <ul class="pa-select-members"><li class="none">ครูที่ยังไม่ถูกเลือกเข้าชุดกรรมการใด</li></ul>
+      <div class="pa-select-foot"><span class="pa-select-count">${restCount} คน</span><span class="pa-select-go">เลือก →</span></div>
+    </button>`;
+  }
+  return `<div class="pa-select-intro"><h2>เลือกชุดกรรมการ</h2><p>แตะเลือกชุดกรรมการเพื่อดูรายชื่อครูที่ชุดนั้นต้องประเมิน</p></div>
+    <div class="pa-select-grid">${cards}</div>`;
+}
+function paDetailHTML(sel){
+  let cm=null, cards=[];
+  if(sel==="__rest__"){
+    const assigned=new Set(); PA_COMMITTEES.forEach(c=>(c.teacherIds||[]).forEach(id=>assigned.add(id)));
+    cards=PA_CARDS.filter(c=>!assigned.has(c.id));
+  }else{
+    cm=PA_COMMITTEES.find(c=>c.id===sel);
+    cards=((cm&&cm.teacherIds)||[]).map(id=>PA_CARDS.find(c=>c.id===id)).filter(Boolean);
+  }
+  return `<button class="pa-backsel" onclick="paBackToSelect()">← กลับหน้าเลือกชุดกรรมการ</button>`
+       + paGroupHTML(cm, cards);
+}
+window.paSelectGroup=(id)=>{ paSelectedCommittee=id; renderPaCards(); const g=$("#paPage"); if(g) g.scrollTop=0; };
+window.paBackToSelect=()=>{ paSelectedCommittee=null; renderPaCards(); const g=$("#paPage"); if(g) g.scrollTop=0; };
 
 /* ---- ชุดกรรมการแบบเรียลไทม์ ---- */
 db.collection("pa_committees").onSnapshot(snap=>{
@@ -2806,6 +2887,9 @@ function openPaPage(){
   $("#paPage").scrollTop=0;
   ["navPaLink","drawerPaLink"].forEach(id=>{ const el=$("#"+id); if(el) el.classList.add("on"); });
   if(typeof closeDrawer==="function") closeDrawer();
+  // เปิดแท็บครั้งใหม่ → เริ่มที่หน้าเลือกชุดกรรมการเสมอ (เฉพาะโหมดกรรมการ)
+  paSelectedCommittee=null;
+  renderPaCards();
 }
 function closePaPage(){
   $("#paPage").classList.remove("open");
